@@ -7,15 +7,10 @@ const { restart } = require("nodemon");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const saltRounds = 9;
+const cubeController = require("../controllers/cubeController");
 
 module.exports = (app) => {
-	app.get("/", async function (req, res) {
-		await CubeModel.find(function (err, cubes) {
-			if (err) return console.error(err);
-			console.log(cubes);
-			res.render("index", { cubes, title: "Sharrods Cube" });
-		});
-	});
+	app.get("/", cubeController.home);
 
 	app.get("/about", function (req, res) {
 		res.render("about");
@@ -25,14 +20,7 @@ module.exports = (app) => {
 		res.render("create");
 	});
 
-	app.post("/create", function (req, res) {
-		console.log(req.body);
-		const newCube = new CubeModel(req.body);
-		newCube.save(function (err, newCube) {
-			console.log("A new cube has been saved");
-		});
-		res.redirect(301, "/");
-	});
+	app.post("/create", cubeController.create);
 
 	app.get("/register", function (req, res) {
 		res.render("registerPage");
@@ -93,10 +81,10 @@ module.exports = (app) => {
 
 	app.post("/create/accessory", function (req, res) {
 		const newAccessory = new AccessoryModel(req.body);
-		newAccessory.save(function (err, newCube) {
+		newAccessory.save(function (err, newAccessory) {
 			console.log("A new accessory has been saved");
 		});
-		res.redirect(301, "/");
+		res.redirect(301, "/create/accessory");
 	});
 
 	app.get("/attach/accessory/:id", function (req, res) {
@@ -104,6 +92,14 @@ module.exports = (app) => {
 			`<h1> No data yet on accessory id page, id is ${req.params.id} </h1>`
 		);
 	});
+
+	// app.get("/attach/accessory/:id", async function (req, res) {
+	// 	// find by id, then pass to template
+	// 	await AccessoryModel.findById(req.params.id).then((accessory) => {
+	// 		console.log(accessory);
+	// 		res.render("attachAccessory", { acc });
+	// 	});
+	// });
 
 	app.get("/*", (req, res) => {
 		res.render("404");
